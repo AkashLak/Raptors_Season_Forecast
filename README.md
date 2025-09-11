@@ -2,7 +2,7 @@
 
 ---
 
-## 🚀 **Overview*
+## 🚀 **Overview**
 A **data-driven sports analytics platform** that leverages 25 years of LA Lakers statistics to forecast season wins and provide actionable insights for analysts, fans, and strategists. The pipeline combines **SQL/PySpark, Airflow, and AWS** for efficient data processing, while **XGBoost** powers predictive forecasts accessible via an interactive **Streamlit** web app.
 
 ---
@@ -66,6 +66,7 @@ streamlit run app.py
 
 ## 📜 License
 This project is licensed under the MIT License.
+
 
 
 
