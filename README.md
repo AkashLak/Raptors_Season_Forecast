@@ -52,7 +52,7 @@ Ideal for **sports analysts, enthusiasts, and Lakers fans** looking to leverage 
 
 ## 🛠️ **Installation:**
 
-## Clone the repo and run the app
+### Clone the repo and run the app
 # Clone the repository (Bash)
 git clone https://github.com/AkashLak/Lakers_Season_Forecast.git
 
