@@ -45,3 +45,23 @@ Ideal for **sports analysts, enthusiasts, and Lakers fans** looking to leverage 
 ---
 
 ## 📸 Demo
+<img width="853" height="749" alt="Lakers_Prediction_Img" src="https://github.com/user-attachments/assets/8c0fd81b-bda9-46ae-89c9-38401470c77a" />
+
+## 🛠️ Installation
+
+### Clone the repo and run the app
+# Clone the repository
+git clone https://github.com/AkashLak/Lakers_Season_Forecast.git
+cd Lakers_Season_Forecast
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the Streamlit app
+streamlit run app.py
+
+## 📜 License
+This project is licensed under the MIT License.
+
+
+
