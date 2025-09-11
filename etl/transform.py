@@ -6,7 +6,7 @@ def clean_column_names(df):
     """Lowercase column names, replace spaces with underscores, remove dots and special chars.""" 
     new_cols = []
     for c in df.columns:
-        # Handle special cases first
+        #Handle special cases first
         new_col = c.lower()
         new_col = new_col.replace(" ", "_")
         new_col = new_col.replace(".", "")
@@ -14,7 +14,7 @@ def clean_column_names(df):
         new_col = new_col.replace("/", "_per_")
         new_col = new_col.replace("(", "").replace(")", "")
         new_col = new_col.replace("-", "_")
-        # Handle columns starting with numbers
+        #Take care of columns starting with numbers
         if new_col.startswith("3"):
             new_col = "three_" + new_col[1:]
         if new_col.startswith("2"):
@@ -31,7 +31,7 @@ def safe_cast_numeric(df, column_name):
         return df
     
     try:
-        # Use a more robust casting approach
+        #Casting Approach
         df = df.withColumn(f"{column_name}_numeric", 
             expr(f"""
                 CASE 
@@ -44,7 +44,7 @@ def safe_cast_numeric(df, column_name):
                 END
             """)
         )
-        # Replace original column with numeric version
+        #Replace original column with numeric version
         df = df.drop(column_name).withColumnRenamed(f"{column_name}_numeric", column_name)
         return df
     except Exception as e:
@@ -62,8 +62,7 @@ def clean_df(df):
     
     df = clean_column_names(df)
     
-    # Based on your actual CSV data - these columns should be numeric
-    # We'll be more selective and only cast columns we know exist
+    #More selective and only casting columns that exist
     potential_numeric_cols = [
         "rk", "age", "g", "gs", "mp", 
         "fg", "fga", "fgpct", "three_p", "three_pa", "three_ppct",
@@ -75,7 +74,6 @@ def clean_df(df):
         "tm", "opp", "w", "l", "trp_dbl", "year"
     ]
     
-    # Only cast columns that actually exist in this dataframe
     numeric_cols_to_cast = [col for col in potential_numeric_cols if col in df.columns]
     
     print(f"Will attempt to cast these columns to numeric: {numeric_cols_to_cast}")
@@ -84,10 +82,10 @@ def clean_df(df):
         df = safe_cast_numeric(df, col_name)
         print(f"Processed column: {col_name}")
     
-    # Drop rows without 'player' for player-level tables
+    #Drop rows without 'player' for player-level tables
     if "player" in df.columns:
         df = df.filter(col("player").isNotNull())
-        # Also filter out empty strings safely
+        #Also filter out empty strings safely
         df = df.filter(~(col("player") == ""))
     
     print(f"Cleaned dataframe now has {df.count()} rows")
@@ -97,7 +95,7 @@ def transform_data():
     """
     Load all tables, clean them, and produce season-level features.
     """
-    # Load and clean tables
+    #Load and clean tables
     tables = {}
     table_names = ["Roster", "RegSeason", "PerGame", "Totals", "Advanced", "TeamOpponent"]
     
@@ -114,7 +112,7 @@ def transform_data():
         except Exception as e:
             print(f"Error processing {table_name}: {e}")
 
-    # Handle RegSeason data - calculate wins per season
+    #RegSeason data - calculate wins per season
     print(f"\n{'='*30} Processing RegSeason {'='*30}")
     reg_df = tables.get("RegSeason")
     season_wins = None
@@ -122,10 +120,10 @@ def transform_data():
     if reg_df is not None:
         print(f"RegSeason columns: {reg_df.columns}")
         
-        # Check if we have the W/L columns after cleaning
+        #Check if we have the W/L columns after cleaning
         if "w" in reg_df.columns and "l" in reg_df.columns and "year" in reg_df.columns:
             try:
-                # Filter out any rows where year, w, or l is null
+                #Filter out any rows where year, w, or l is null
                 reg_df_clean = reg_df.filter(
                     col("year").isNotNull() & 
                     col("w").isNotNull() & 
@@ -135,7 +133,7 @@ def transform_data():
                 print(f"RegSeason rows after cleaning: {reg_df_clean.count()}")
                 
                 if reg_df_clean.count() > 0:
-                    # Group by year and sum wins/losses
+                    #Group by year and sum wins/losses
                     season_wins = reg_df_clean.groupBy("year").agg(
                         F.sum("w").alias("wins"),
                         F.sum("l").alias("losses"),
@@ -149,14 +147,14 @@ def transform_data():
         else:
             print("Missing required columns (w, l, year) in RegSeason")
     
-    # If we couldn't get season wins, create a dummy dataset
+    #If couldn't get season wins, create a dummy dataset
     if season_wins is None:
         print("Creating dummy season wins data")
         season_wins = tables.get("PerGame", tables.get("Advanced"))
         if season_wins and "year" in season_wins.columns:
             season_wins = season_wins.select("year").distinct().withColumn("wins", lit(0))
 
-    # Use PerGame data for team averages
+    #Use PerGame data for team averages
     print(f"\n{'='*30} Processing PerGame {'='*30}")
     pergame_df = tables.get("PerGame")
     team_features = None
@@ -165,7 +163,7 @@ def transform_data():
         available_cols = pergame_df.columns
         print(f"PerGame columns: {available_cols}")
         
-        # Filter for valid data
+        #Filter for valid data
         if "player" in pergame_df.columns and "year" in pergame_df.columns:
             pergame_clean = pergame_df.filter(
                 col("player").isNotNull() & 
@@ -175,10 +173,10 @@ def transform_data():
             print(f"PerGame rows after cleaning: {pergame_clean.count()}")
             
             if pergame_clean.count() > 0:
-                # Build aggregation expressions for available columns
+                #Build aggregation expressions for available columns
                 agg_exprs = []
                 
-                # Map of column names to aggregation aliases
+                #Map of column names to aggregation aliases
                 agg_mapping = {
                     "pts": "avg_pts",
                     "fgpct": "avg_fg_pct", 
@@ -208,7 +206,7 @@ def transform_data():
                     print("No valid columns for aggregation")
                     team_features = pergame_clean.select("year").distinct()
 
-    # Combine features and wins
+    #Combine features and wins
     print(f"\n{'='*30} Combining Results {'='*30}")
     dataset = None
     

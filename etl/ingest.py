@@ -2,15 +2,11 @@ from pyspark.sql import SparkSession
 import os
 from pyspark.sql.functions import lit, when, col
 
-# ------------------------------
-# Spark session
-# ------------------------------
+#Spark session
 spark = SparkSession.builder.appName("RaptorsSeasonForecast").getOrCreate()
 data_root = "data"
 
-# ------------------------------
-# Load individual table
-# ------------------------------
+#Load individual table
 def load_table(table_name):
     dfs = []
     
@@ -25,20 +21,20 @@ def load_table(table_name):
             continue
 
         try:
-            # Use inferSchema=False to avoid casting issues initially
+            #Use inferSchema=False to avoid casting issues initially
             df = spark.read.csv(path, header=True, inferSchema=False)
             
             if df.count() == 0:
                 print(f"Empty file: {path}")
                 continue
             
-            # Add year column
+            #year column
             df = df.withColumn("year", lit(int(year)))
             
-            # Special handling for RegSeason - convert result columns to binary
+            #RegSeason - convert result columns to binary
             if table_name.lower() == "regseason":
-                # Your RegSeason has separate Tm/Opp scores and W/L columns
-                # Convert W/L to 1/0 for easier processing
+                #RegSeason has separate Tm/Opp scores and W/L columns
+                #Convert W/L to 1/0 for easier processing
                 if "W" in df.columns and "L" in df.columns:
                     df = df.withColumn("W", 
                         when(col("W").isNotNull() & (col("W") != ""), lit(1))
@@ -49,9 +45,9 @@ def load_table(table_name):
                         .otherwise(lit(0))
                     )
             
-            # Special handling for TeamOpponent table
+            #Special handling for TeamOpponent table
             if table_name.lower() in ["teamopponent", "team"]:
-                # The first column should be renamed to 'team' 
+                #The first column renamed to 'team' 
                 if df.columns:
                     df = df.withColumnRenamed(df.columns[0], "team")
             
@@ -66,7 +62,7 @@ def load_table(table_name):
         print(f"Warning: No CSVs found for table {table_name}")
         return None
 
-    # Union all years together
+    #Union all years together
     try:
         combined = dfs[0]
         for df in dfs[1:]:
@@ -79,9 +75,7 @@ def load_table(table_name):
         print(f"Error combining DataFrames for {table_name}: {e}")
         return None
 
-# ------------------------------
-# Ingest all tables
-# ------------------------------
+#Ingest all tables
 def ingest_data():
     print("Ingesting all tables...")
     tables = ["Roster", "TeamOpponent", "PerGame", "Totals", "Advanced", "RegSeason"]
