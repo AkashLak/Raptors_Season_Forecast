@@ -51,6 +51,7 @@ Ideal for **sports analysts, enthusiasts, and Lakers fans** looking to leverage 
 ### Clone the repo and run the app
 # Clone the repository (Bash)
 git clone https://github.com/AkashLak/Lakers_Season_Forecast.git
+
 cd Lakers_Season_Forecast
 
 # Install dependencies
@@ -61,6 +62,7 @@ streamlit run app.py
 
 ## 📜 License
 This project is licensed under the MIT License.
+
 
 
 
